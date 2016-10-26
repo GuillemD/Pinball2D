@@ -30,6 +30,7 @@ bool ModuleSceneIntro::Start()
 	bonus_fx = App->audio->LoadFx("pinball/bonus.wav");
 	background = App->textures->Load("pinball/background.png");
 	foreground = App->textures->Load("pinball/foreground.png");
+	App->audio->PlayMusic("pinball/Pixeljam - Snowball Theme.ogg");
 
 	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
 
