@@ -3,6 +3,7 @@
 #include "p2List.h"
 #include "p2Point.h"
 #include "Globals.h"
+#include "Box2D/Box2D/Box2D.h"
 
 class PhysBody;
 
@@ -18,7 +19,9 @@ public:
 	void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 
 public:
+	
 	p2List<PhysBody*> circles;
+	PhysBody* ball;
 	p2List<PhysBody*> boxes;
 	p2List<PhysBody*> Chains;
 
@@ -746,23 +749,82 @@ public:
 
 
 	
+	//kickers and springs
 
-	
-	
+	int leftKicker[8] = {
+		0, 7,
+		0, -7,
+		48, -2,
+		48, 2
+	};
+	int leftKicker2[8] = {
+		0, 7,
+		0, -7,
+		48, -2,
+		48, 2
+	};
+	int leftKicker3[8] = {
+		0, 7,
+		0, -7,
+		48, -2,
+		48, 2
+	};
 
+	int rightKicker[8] = {
+		0, 7,
+		0, -7,
+		-48, -2,
+		-48, 2
+	};
+
+	int rightKicker2[8] = {
+		0, 7,
+		0, -7,
+		-48, -2,
+		-48, 2
+	};
+	int rightKicker3[8] = {
+		0, 7,
+		0, -7,
+		-48, -2,
+		-48, 2
+	};
+
+	PhysBody* kicker_l;
+	PhysBody* kicker_l_2;
+	PhysBody* kicker_l_3;
+
+	PhysBody* kicker_r;
+	PhysBody* kicker_r_2;
+	PhysBody* kicker_r_3;
+	
+	//sensors
 	PhysBody* sensor;
 	PhysBody* teleporter;
 	PhysBody* accelerator_spiral;
 	PhysBody* accelerator_left;
 	PhysBody* accelerator_right;
 
+	PhysBody* accelerator_right_bot;
+	PhysBody* accelerator_left_bot;
+
+	PhysBody* game_over_sensor;
 	bool sensed;
+	//textures
 
 	SDL_Texture* circle;
 	SDL_Texture* box;
 	SDL_Texture* background;
 	SDL_Texture* foreground;
+	SDL_Texture* kickers;
 	uint bonus_fx;
 	
+	//joints
+	b2RevoluteJoint* rJoint_left = nullptr;
+	b2RevoluteJoint* rJoint_right = nullptr;
+	b2RevoluteJoint* rJoint_left2 = nullptr;
+	b2RevoluteJoint* rJoint_right2 = nullptr;
+	b2RevoluteJoint* rJoint_right3 = nullptr;
+	b2RevoluteJoint* rJoint_left3 = nullptr;
 	
 };

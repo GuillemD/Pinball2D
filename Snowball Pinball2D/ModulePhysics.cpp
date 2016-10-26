@@ -58,10 +58,10 @@ update_status ModulePhysics::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
-PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
+PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, b2BodyType type)
 {
 	b2BodyDef body;
-	body.type = b2_dynamicBody;
+	body.type = type;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
 	b2Body* b = world->CreateBody(&body);
@@ -103,6 +103,39 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 	b->SetUserData(pbody);
 	pbody->width = width * 0.5f;
 	pbody->height = height * 0.5f;
+
+	return pbody;
+}
+
+PhysBody* ModulePhysics::CreatePolygon(int x, int y, int* points, int size)
+{
+	b2BodyDef body;
+	body.type = b2_dynamicBody;
+	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
+
+	b2Body* b = world->CreateBody(&body);
+	b2PolygonShape polygon;
+
+	b2Vec2* p = new b2Vec2[size / 2];
+
+	for (uint i = 0; i < size / 2; ++i)
+	{
+		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
+		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
+	}
+	polygon.Set(p, size / 2);
+
+	b2FixtureDef fixture;
+	fixture.density = 1.0f;
+	fixture.shape = &polygon;
+	b->CreateFixture(&fixture);
+
+	delete p;
+
+	PhysBody* pbody = new PhysBody();
+	pbody->body = b;
+	b->SetUserData(pbody);
+	pbody->width = pbody->height = 0;
 
 	return pbody;
 }
@@ -390,17 +423,7 @@ int PhysBody::RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& no
 
 	return ret;
 }
-/*bool ModulePhysics::DeleteBody(b2Body* body)
-{
-	if (body != NULL)
-	{
-		world->DestroyBody(body);
-		body->SetUserData(NULL);
-		body = NULL;
-	}
 
-	return true;
-}*/
 
 void ModulePhysics::BeginContact(b2Contact* contact)
 {
@@ -412,4 +435,24 @@ void ModulePhysics::BeginContact(b2Contact* contact)
 
 	if(physB && physB->listener != NULL)
 		physB->listener->OnCollision(physB, physA);
+}
+b2RevoluteJoint* ModulePhysics::createRevoluteJoint(PhysBody* body1, PhysBody* body2, float anchorX, float anchorY, int reference_angle,int min_angle, int max_angle)
+{
+	b2RevoluteJointDef rJoint;
+	rJoint.bodyA = body1->body;
+	rJoint.bodyB = body2->body;
+	rJoint.localAnchorA.Set(PIXEL_TO_METERS(anchorX), PIXEL_TO_METERS(anchorY));
+	rJoint.localAnchorB.Set(0, 0);
+
+	rJoint.collideConnected = false;
+	rJoint.enableLimit = true;
+	
+	rJoint.referenceAngle = DEGTORAD*reference_angle;
+	rJoint.lowerAngle = DEGTORAD*min_angle;
+	rJoint.upperAngle = DEGTORAD*max_angle;
+
+	rJoint.enableMotor = true;
+	rJoint.maxMotorTorque = 150;
+
+	return (b2RevoluteJoint*)world->CreateJoint(&rJoint);
 }

@@ -9,7 +9,7 @@
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	circle = box = background = foreground = NULL;
+	circle = box = background = foreground = kickers = NULL;
 	sensed = false;
 }
 
@@ -29,13 +29,19 @@ bool ModuleSceneIntro::Start()
 	bonus_fx = App->audio->LoadFx("pinball/bonus.wav");
 	background = App->textures->Load("pinball/background.png");
 	foreground = App->textures->Load("pinball/foreground.png");
+	kickers = App->textures->Load("pinball/kickers.png");
+
 	App->audio->PlayMusic("pinball/Pixeljam - Snowball Theme.ogg");
 
 	sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, 700, SCREEN_WIDTH, 10);
 	teleporter = App->physics->CreateRectangleSensor(145, 200, 20, 5);
 	accelerator_spiral = App->physics->CreateRectangleSensor(73, 170, 20, 5);
 	accelerator_right = App->physics->CreateRectangleSensor(455, 320, 5, 20);
-	accelerator_left = App->physics->CreateRectangleSensor(350, 320, 5, 20);
+	accelerator_left = App->physics->CreateRectangleSensor(350, 323, 5, 20);
+
+	accelerator_right_bot = App->physics->CreateRectangleSensor(695, 1305, 5, 20);
+	accelerator_left_bot = App->physics->CreateRectangleSensor(180, 1337, 5, 20);
+	game_over_sensor = App->physics->CreateRectangleSensor(400, 1430, 90, 10);
 
 	//outer map chains
 	Chains.add(App->physics->CreateChain(0, 0, map, 472, b2BodyType::b2_staticBody));
@@ -67,8 +73,31 @@ bool ModuleSceneIntro::Start()
 	Chains.add(App->physics->CreateChain(0, 0, middle_mid, 90, b2BodyType::b2_staticBody));
 	Chains.add(App->physics->CreateChain(0, 0, middle_mid2, 34, b2BodyType::b2_staticBody));
 
-
+	//kickers
 	
+	kicker_l = App->physics->CreatePolygon(340, 1360, leftKicker, 8);
+	PhysBody* C = App->physics->CreateCircle(340, 1360, 7, b2BodyType::b2_staticBody);
+	rJoint_left = App->physics->createRevoluteJoint(kicker_l, C, 0, 0, -5, -15, 15);
+
+	kicker_r = App->physics->CreatePolygon(465, 1360, rightKicker, 8);
+	PhysBody* B = App->physics->CreateCircle(465, 1360, 7, b2BodyType::b2_staticBody);
+	rJoint_right = App->physics->createRevoluteJoint(kicker_r, B, 0, 0, -180, 165, 200);
+
+	kicker_l_2 = App->physics->CreatePolygon(350, 595, leftKicker2, 8);
+	PhysBody* C2 = App->physics->CreateCircle(350, 595, 7, b2BodyType::b2_staticBody);
+	rJoint_left2 = App->physics->createRevoluteJoint(kicker_l_2, C2, 0, 0, -5, -15, 15);
+
+	kicker_r_2 = App->physics->CreatePolygon(480, 595, rightKicker2, 8);
+	PhysBody* B2 = App->physics->CreateCircle(480, 595, 7, b2BodyType::b2_staticBody);
+	rJoint_right2 = App->physics->createRevoluteJoint(kicker_r_2, B2, 0, 0, -180, 165, 200);
+
+	kicker_l_3 = App->physics->CreatePolygon(610, 400, leftKicker3, 8);
+	PhysBody* C3 = App->physics->CreateCircle(610, 400, 7, b2BodyType::b2_staticBody);
+	rJoint_left3 = App->physics->createRevoluteJoint(kicker_l_3, C3, 0, 0, -5, -15, 15);
+
+	kicker_r_3 = App->physics->CreatePolygon(207, 945, rightKicker3, 8);
+	PhysBody* B3 = App->physics->CreateCircle(207, 945, 7, b2BodyType::b2_staticBody);
+	rJoint_right3 = App->physics->createRevoluteJoint(kicker_r_3, B3, 0, 0, -140, 165, 200);
 
 	return ret;
 }
@@ -77,12 +106,12 @@ bool ModuleSceneIntro::Start()
 bool ModuleSceneIntro::CleanUp()
 {
 	LOG("Unloading Intro scene");
-	
+	/*
 	App->textures->Unload(foreground);
 	App->textures->Unload(background);
 	App->textures->Unload(box);
 	App->textures->Unload(circle);
-	
+	*/
 	
 	return true;
 }
@@ -98,15 +127,43 @@ update_status ModuleSceneIntro::Update()
 
 	if(App->input->GetKey(SDL_SCANCODE_1) == KEY_DOWN)
 	{
-		circles.add(App->physics->CreateCircle(App->input->GetMouseX(), App->input->GetMouseY(), 8));
-		circles.getLast()->data->listener = this;
+		if (ball == NULL)
+		{
+			ball = App->physics->CreateCircle(770, 350, 8, b2BodyType::b2_dynamicBody);
+			ball->listener = this;
+		}
+		
 	}
-	
-
-	if(App->input->GetKey(SDL_SCANCODE_2) == KEY_DOWN)
+	if (App->input->GetKey(SDL_SCANCODE_D) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		boxes.add(App->physics->CreateRectangle(App->input->GetMouseX(), App->input->GetMouseY(), 100, 50));
+		rJoint_right->SetMotorSpeed(-30);
+		rJoint_right2->SetMotorSpeed(-30);
+		rJoint_right3->SetMotorSpeed(-30);
+		
 	}
+	else
+	{
+		rJoint_right->SetMotorSpeed(30);
+		rJoint_right2->SetMotorSpeed(30);
+		rJoint_right3->SetMotorSpeed(30);
+		
+	}
+	if (App->input->GetKey(SDL_SCANCODE_A) == KEY_DOWN || App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+	{
+		rJoint_left->SetMotorSpeed(30);
+		rJoint_left2->SetMotorSpeed(30);
+		rJoint_left3->SetMotorSpeed(30);
+
+	}
+	else
+	{
+		rJoint_left->SetMotorSpeed(-30);
+		rJoint_left2->SetMotorSpeed(-30);
+		rJoint_left3->SetMotorSpeed(-30);
+
+	}
+
+	
 
 	
 
@@ -118,7 +175,16 @@ update_status ModuleSceneIntro::Update()
 	
 
 	fVector normal(0.0f, 0.0f);
+	int x, y;
+	if (ball != NULL)
+	{
+		ball->GetPosition(x, y);
+		ball->body->SetTransform(b2Vec2(ball->body->GetPosition().x, ball->body->GetPosition().y), 90);
 
+		
+
+		App->renderer->Blit(circle, x - 2, y, NULL, 1.0f, ball->GetRotation());
+	}
 	// All draw functions ------------------------------------------------------
 	p2List_item<PhysBody*>* c = circles.getFirst();
 
@@ -126,6 +192,7 @@ update_status ModuleSceneIntro::Update()
 	{
 		int x, y;
 		c->data->GetPosition(x, y);
+		
 		
 		App->renderer->Blit(circle, x, y, NULL, 1.0f, c->data->GetRotation());
 		c = c->next;
@@ -143,7 +210,32 @@ update_status ModuleSceneIntro::Update()
 	}
 
 	App->renderer->Blit(foreground, 0, 0, NULL, 1.0f, NULL);
+	//left
+	SDL_Rect section;
+	section.x = 10;
+	section.y = 0;
+	section.h = 40;
+	section.w = 37;
+
+	App->renderer->Blit(kickers, 340, 1355, &section, 1.0f, (-rJoint_left->GetJointAngle() * RADTODEG) + 320, 0, 0);
 	
+	App->renderer->Blit(kickers, 350, 590, &section, 1.0f, (-rJoint_left2->GetJointAngle() * RADTODEG) + 320, 0, 0);
+	
+
+	App->renderer->Blit(kickers, 610, 390, &section, 1.0f, (-rJoint_left3->GetJointAngle() * RADTODEG) + 320, 0, 0);
+	//right
+	SDL_Rect section1;
+	section1.x = 63;
+	section1.y = 0;
+	section1.h = 40;
+	section1.w = 37;
+	App->renderer->Blit(kickers, 435, 1340, &section1, 1.0f, (-rJoint_right->GetJointAngle() * RADTODEG) + 230, 20, 10);
+
+	
+	App->renderer->Blit(kickers, 443, 580, &section1, 1.0f, (-rJoint_right2->GetJointAngle() * RADTODEG) + 230, 20, 10);
+
+	
+	//App->renderer->Blit(kickers, 207, 945, &section1, 1.0f, (-rJoint_right3->GetJointAngle() * RADTODEG) + 210, 0, 0);
 
 	return UPDATE_CONTINUE;
 }
@@ -175,5 +267,20 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	else if (bodyB == teleporter)
 	{
 		
+		//bodyA->body->SetTransform(b2Vec2(0, -20), 0.0);
+			
+		
+		
+	}else if(bodyB == accelerator_left || bodyB == accelerator_spiral  || bodyB == accelerator_left_bot)
+	{
+		bodyA->body->SetLinearVelocity(b2Vec2(-10, 20));
+		
+		
+	
+	}
+	else if (bodyB == accelerator_right || bodyB == accelerator_right_bot)
+	{
+		bodyA->body->SetLinearVelocity(b2Vec2(10, 10));
+
 	}
 }
