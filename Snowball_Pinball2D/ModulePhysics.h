@@ -31,7 +31,7 @@ public:
 };
 
 // Module --------------------------------------
-class ModulePhysics : public Module, public b2ContactListener // TODO
+class ModulePhysics : public Module, public b2ContactListener 
 {
 public:
 	ModulePhysics(Application* app, bool start_enabled = true);
@@ -41,6 +41,9 @@ public:
 	update_status PreUpdate();
 	update_status PostUpdate();
 	bool CleanUp();
+	//bool DeleteBody(b2Body* body);
+
+	
 
 	PhysBody* CreateCircle(int x, int y, int radius);
 	PhysBody* CreateRectangle(int x, int y, int width, int height);
@@ -53,6 +56,7 @@ public:
 private:
 
 	bool debug;
+	
 	b2World* world;
 	b2MouseJoint* mouse_joint;
 	b2Body* ground;

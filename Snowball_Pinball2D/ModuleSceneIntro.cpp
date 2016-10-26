@@ -9,8 +9,7 @@
 
 ModuleSceneIntro::ModuleSceneIntro(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	circle = box = background = NULL;
-	ray_on = false;
+	circle = box = background = foreground = NULL;
 	sensed = false;
 }
 
@@ -32,7 +31,11 @@ bool ModuleSceneIntro::Start()
 	foreground = App->textures->Load("pinball/foreground.png");
 	App->audio->PlayMusic("pinball/Pixeljam - Snowball Theme.ogg");
 
-	//sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT, SCREEN_WIDTH, 50);
+	sensor = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, 700, SCREEN_WIDTH, 10);
+	teleporter = App->physics->CreateRectangleSensor(145, 200, 20, 5);
+	accelerator_spiral = App->physics->CreateRectangleSensor(73, 170, 20, 5);
+	accelerator_right = App->physics->CreateRectangleSensor(455, 320, 5, 20);
+	accelerator_left = App->physics->CreateRectangleSensor(350, 320, 5, 20);
 
 	//outer map chains
 	Chains.add(App->physics->CreateChain(0, 0, map, 472, b2BodyType::b2_staticBody));
@@ -63,6 +66,10 @@ bool ModuleSceneIntro::Start()
 	Chains.add(App->physics->CreateChain(0, 0, middle_bot4, 16, b2BodyType::b2_staticBody));
 	Chains.add(App->physics->CreateChain(0, 0, middle_mid, 90, b2BodyType::b2_staticBody));
 	Chains.add(App->physics->CreateChain(0, 0, middle_mid2, 34, b2BodyType::b2_staticBody));
+
+
+	
+
 	return ret;
 }
 
@@ -83,12 +90,7 @@ bool ModuleSceneIntro::CleanUp()
 // Update: draw background
 update_status ModuleSceneIntro::Update()
 {
-	/*if(App->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
-	{
-		ray_on = !ray_on;
-		ray.x = App->input->GetMouseX();
-		ray.y = App->input->GetMouseY();
-	}*/
+	
 	
 		App->renderer->Blit(background, 0, 0, NULL, 1.0f, NULL);
 	
@@ -113,7 +115,7 @@ update_status ModuleSceneIntro::Update()
 	iPoint mouse;
 	mouse.x = App->input->GetMouseX();
 	mouse.y = App->input->GetMouseY();
-	int ray_hit = ray.DistanceTo(mouse);
+	
 
 	fVector normal(0.0f, 0.0f);
 
@@ -124,7 +126,7 @@ update_status ModuleSceneIntro::Update()
 	{
 		int x, y;
 		c->data->GetPosition(x, y);
-		//if(c->data->Contains(App->input->GetMouseX(), App->input->GetMouseY()))
+		
 		App->renderer->Blit(circle, x, y, NULL, 1.0f, c->data->GetRotation());
 		c = c->next;
 	}
@@ -136,28 +138,12 @@ update_status ModuleSceneIntro::Update()
 		int x, y;
 		c->data->GetPosition(x, y);
 		App->renderer->Blit(box, x, y, NULL, 1.0f, c->data->GetRotation());
-		if(ray_on)
-		{
-			int hit = c->data->RayCast(ray.x, ray.y, mouse.x, mouse.y, normal.x, normal.y);
-			if(hit >= 0)
-				ray_hit = hit;
-		}
+		
 		c = c->next;
 	}
 
 	App->renderer->Blit(foreground, 0, 0, NULL, 1.0f, NULL);
-	// ray -----------------
-	if(ray_on == true)
-	{
-		fVector destination(mouse.x-ray.x, mouse.y-ray.y);
-		destination.Normalize();
-		destination *= ray_hit;
-
-		App->renderer->DrawLine(ray.x, ray.y, ray.x + destination.x, ray.y + destination.y, 255, 255, 255);
-
-		if(normal.x != 0.0f)
-			App->renderer->DrawLine(ray.x + destination.x, ray.y + destination.y, ray.x + destination.x + normal.x * 25.0f, ray.y + destination.y + normal.y * 25.0f, 100, 255, 100);
-	}
+	
 
 	return UPDATE_CONTINUE;
 }
@@ -168,16 +154,26 @@ void ModuleSceneIntro::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 
 	//App->audio->PlayFx(bonus_fx);
 
-	/*
-	if(bodyA)
-	{
-		bodyA->GetPosition(x, y);
-		App->renderer->DrawCircle(x, y, 50, 100, 100, 100);
-	}
 
-	if(bodyB)
+
+	if(bodyB == sensor)
 	{
-		bodyB->GetPosition(x, y);
-		App->renderer->DrawCircle(x, y, 50, 100, 100, 100);
-	}*/
+		if (sensed != true)
+		{
+			sensed = true;
+			App->renderer->camera.x = 0;
+			for(int i = 0; i > -620; i -= 20)
+			
+			App->renderer->camera.y -= 20;
+		}
+		else
+		{
+			sensed = false;
+			App->renderer->camera.x = App->renderer->camera.y = 0;
+		}
+	}
+	else if (bodyB == teleporter)
+	{
+		
+	}
 }

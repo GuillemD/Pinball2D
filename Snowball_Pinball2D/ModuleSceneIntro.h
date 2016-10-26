@@ -751,6 +751,11 @@ public:
 	
 
 	PhysBody* sensor;
+	PhysBody* teleporter;
+	PhysBody* accelerator_spiral;
+	PhysBody* accelerator_left;
+	PhysBody* accelerator_right;
+
 	bool sensed;
 
 	SDL_Texture* circle;
@@ -758,6 +763,6 @@ public:
 	SDL_Texture* background;
 	SDL_Texture* foreground;
 	uint bonus_fx;
-	p2Point<int> ray;
-	bool ray_on;
+	
+	
 };
