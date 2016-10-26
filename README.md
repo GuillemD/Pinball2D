@@ -1,7 +1,8 @@
-# Pinball2D
+# Snowball Pinball by Jan Fuentes and Guillem Dominguez
 Recreation of a 2D pinball game with Box2D
 
 https://github.com/GuillemD/Pinball2D <-- this is the link to our github repository
+http://www.minijuegos.com/juego/snowball-i12203 <-- link to the original game
 
 Controls:
 
