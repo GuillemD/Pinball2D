@@ -805,20 +805,31 @@ public:
 	PhysBody* accelerator_left;
 	PhysBody* accelerator_right;
 
+
 	PhysBody* accelerator_right_bot;
 	PhysBody* accelerator_left_bot;
 
+	PhysBody* bot_right_spring;
+	PhysBody* bot_left_spring;
+	PhysBody* mid_spring;
+
 	PhysBody* game_over_sensor;
+
+
 	bool sensed;
+	bool ball_available;
+	bool lose;
 	//textures
 
 	SDL_Texture* circle;
-	SDL_Texture* box;
+	//SDL_Texture* box;
 	SDL_Texture* background;
 	SDL_Texture* foreground;
 	SDL_Texture* kickers;
+	SDL_Texture* objects;
 	uint bonus_fx;
 	
+
 	//joints
 	b2RevoluteJoint* rJoint_left = nullptr;
 	b2RevoluteJoint* rJoint_right = nullptr;
@@ -826,5 +837,6 @@ public:
 	b2RevoluteJoint* rJoint_right2 = nullptr;
 	b2RevoluteJoint* rJoint_right3 = nullptr;
 	b2RevoluteJoint* rJoint_left3 = nullptr;
+
 	
 };

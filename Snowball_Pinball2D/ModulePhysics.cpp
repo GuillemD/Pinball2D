@@ -16,7 +16,7 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 {
 	world = NULL;
 	mouse_joint = NULL;
-	debug = true;
+	debug = false;
 }
 
 // Destructor
@@ -58,6 +58,17 @@ update_status ModulePhysics::PreUpdate()
 	return UPDATE_CONTINUE;
 }
 
+bool ModulePhysics::deleteBall(b2Body* body)
+{
+	if (body != NULL)
+		 {
+		world->DestroyBody(body);
+		body->SetUserData(NULL);
+		body = NULL;
+		}
+	return true;
+}
+
 PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, b2BodyType type)
 {
 	b2BodyDef body;
@@ -82,10 +93,10 @@ PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius, b2BodyType type)
 	return pbody;
 }
 
-PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
+PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height, b2BodyType type)
 {
 	b2BodyDef body;
-	body.type = b2_dynamicBody;
+	body.type = type;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
 	b2Body* b = world->CreateBody(&body);
@@ -423,6 +434,17 @@ int PhysBody::RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& no
 
 	return ret;
 }
+/*bool ModulePhysics::DeleteBody(b2Body* body)
+{
+	if (body != NULL)
+	{
+		world->DestroyBody(body);
+		body->SetUserData(NULL);
+		body = NULL;
+	}
+
+	return true;
+}*/
 
 
 void ModulePhysics::BeginContact(b2Contact* contact)

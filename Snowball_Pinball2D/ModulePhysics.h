@@ -40,13 +40,18 @@ public:
 	bool Start();
 	update_status PreUpdate();
 	update_status PostUpdate();
-	bool CleanUp();
 	
+	bool CleanUp();
 
 	
+
+
+	
+
+	bool deleteBall(b2Body* body);
 
 	PhysBody* CreateCircle(int x, int y, int radius, b2BodyType type);
-	PhysBody* CreateRectangle(int x, int y, int width, int height);
+	PhysBody* CreateRectangle(int x, int y, int width, int height, b2BodyType type);
 	PhysBody* CreatePolygon(int x, int y, int* points, int size);
 	PhysBody* CreateRectangleSensor(int x, int y, int width, int height);
 	PhysBody* CreateChain(int x, int y, int* points, int size, b2BodyType bodytype);
@@ -56,12 +61,14 @@ public:
 	// b2ContactListener ---
 	void BeginContact(b2Contact* contact);
 
-	b2World* world;
+	
 private:
 
 	bool debug;
 	
-	
+
+
+	b2World* world;
 	b2MouseJoint* mouse_joint;
 
 	b2Body* ground;
